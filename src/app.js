@@ -79,7 +79,18 @@ app.post('/login', passport.authenticate('local', {
 
 
 app.get("/join", (req, res) => {
+    console.log(req.user)
     res.render("join")
+})
+
+app.post("/join", (req, res) => {
+    const a = req.user.username 
+    if(req.body.code == 'admin'){
+        pool.query("UPDATE users SET isadmin = TRUE WHERE username = $1", [a])
+    }else if(req.body.code == 'member'){
+        pool.query("UPDATE users SET ismember = TRUE WHERE username = $1", [a])
+    }
+    res.redirect("/")
 })
 
 app.get("/logout", (req, res, next) => {
