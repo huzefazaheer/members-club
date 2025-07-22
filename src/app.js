@@ -4,7 +4,7 @@ const LocalStrategy = require('passport-local').Strategy
 const path = require('path')
 const bcrypt = require('bcryptjs')
 const express = require('express')
-const { getUsers, signUpUser, getUserByUsername, getAllMessages, getAllMessagesWithAuthor } = require('./models/db')
+const { getUsers, signUpUser, getUserByUsername, getAllMessages, getAllMessagesWithAuthor, deleteMessage, createNewMessage } = require('./models/db')
 const { nextTick } = require('process')
 const session = require('express-session')
 const pool = require('./models/pool')
@@ -60,6 +60,7 @@ app.get("/", async (req, res) => {
     }else{
         msgs = await getAllMessages()
     }
+    console.log(msgs)
     res.render("index", { user: req.user, msgs:msgs})
 })
 
@@ -118,6 +119,24 @@ app.get("/logout", (req, res, next) => {
 app.get("/new", (req, res) => {
     if(req.user){
         res.render("newpost")
+    }else{
+        throw new Error("uhuh")
+    }
+})
+
+app.post("/new", async (req, res) => {
+    if(req.user){
+        await createNewMessage(req.body.text, req.user.id)
+        res.redirect("/")
+    }else{
+        throw new Error("uhuh")
+    }
+})
+
+app.get("/delete/:id", async (req, res) => {
+    if(req.user && req.user.isadmin){
+        await deleteMessage(req.params.id)
+        res.redirect("/")
     }else{
         throw new Error("uhuh")
     }
