@@ -58,7 +58,11 @@ app.get("/", (req, res) => {
 })
 
 app.get("/signup", (req, res) => {
-    res.render("signup")
+    if(!req.user){
+        res.render("signup")
+    }else{
+        throw new Error("uhuh")
+    }
 })
 
 app.post("/signup", async (req, res, next) => {
@@ -79,8 +83,11 @@ app.post('/login', passport.authenticate('local', {
 
 
 app.get("/join", (req, res) => {
-    console.log(req.user)
-    res.render("join")
+    if(req.user){
+        res.render("join")
+    }else{
+        throw new Error("uhuh")
+    }
 })
 
 app.post("/join", (req, res) => {
@@ -102,8 +109,20 @@ app.get("/logout", (req, res, next) => {
   });
 });
 
+app.get("/new", (req, res) => {
+    if(req.user){
+        res.render("newpost")
+    }else{
+        throw new Error("uhuh")
+    }
+})
+
 
 app.use((req, res, next) => {
+    res.render("error")
+})
+
+app.use((error, req, res, next) => {
     res.render("error")
 })
 
