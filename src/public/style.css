@@ -116,3 +116,7 @@ form{
     color: white;
     border-radius: 10px;
 }
+
+.username{
+    text-transform: capitalize;
+}
