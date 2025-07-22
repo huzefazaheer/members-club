@@ -4,7 +4,7 @@ const LocalStrategy = require('passport-local').Strategy
 const path = require('path')
 const bcrypt = require('bcryptjs')
 const express = require('express')
-const { getUsers, signUpUser, getUserByUsername } = require('./models/db')
+const { getUsers, signUpUser, getUserByUsername, getAllMessages, getAllMessagesWithAuthor } = require('./models/db')
 const { nextTick } = require('process')
 const session = require('express-session')
 const pool = require('./models/pool')
@@ -53,8 +53,14 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-app.get("/", (req, res) => {
-    res.render("index", { user: req.user })
+app.get("/", async (req, res) => {
+    let msgs
+    if(req.user && (req.user.isadmin || req.user.ismember)){
+        msgs = await getAllMessagesWithAuthor()
+    }else{
+        msgs = await getAllMessages()
+    }
+    res.render("index", { user: req.user, msgs:msgs})
 })
 
 app.get("/signup", (req, res) => {
@@ -118,13 +124,13 @@ app.get("/new", (req, res) => {
 })
 
 
-app.use((req, res, next) => {
-    res.render("error")
-})
+// app.use((req, res, next) => {
+//     res.render("error")
+// })
 
-app.use((error, req, res, next) => {
-    res.render("error")
-})
+// app.use((error, req, res, next) => {
+//     res.render("error")
+// })
 
 app.listen(PORT, ()=> {
     console.log("Server has been started")
