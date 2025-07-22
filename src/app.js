@@ -1,40 +1,96 @@
 require('dotenv').config({path:"./.env"})
 const passport = require('passport')
+const LocalStrategy = require('passport-local').Strategy
 const path = require('path')
+const bcrypt = require('bcryptjs')
 const express = require('express')
-const { getUsers } = require('./models/db')
+const { getUsers, signUpUser, getUserByUsername } = require('./models/db')
+const { nextTick } = require('process')
+const session = require('express-session')
+const pool = require('./models/pool')
 const app = express()
 const PORT = process.env.PORT || 8080
 
-app.set("view engine", "ejs")
 const viewsPath = path.join(__dirname, "views")
 const publicPath = path.join(__dirname, "public")
-app.use(express.static(publicPath))
+app.set("view engine", "ejs")
 app.set("views", viewsPath)
-app.use(express.urlencoded({ extended: true }));
 
-// passport.use(new LocalStrategy(
-//   function(username, password, done) {
-//     User.findOne({ username: username }, function (err, user) {
-//       if (err) { return done(err); }
-//       if (!user) { return done(null, false); }
-//       if (!user.verifyPassword(password)) { return done(null, false); }
-//       return done(null, user);
-//     });
-//   }
-// ));
+app.use(session({ secret: "cats", resave: false, saveUninitialized: false }));
+app.use(passport.session());
+app.use(express.static(publicPath))
+app.use(express.urlencoded({ extended: true })); 
+
+
+passport.use(new LocalStrategy(
+    async function(username, password, done){
+
+        try {
+            const user = await getUserByUsername(username)
+            if(!user) return done(null, false, {message:"Incorrect Username"})
+            const passwordMatch = await bcrypt.compare(password, user.password)
+            if(!passwordMatch) return done(null, false, {message:"Incorrect Password"})
+            return done(null, user)
+        } catch (error) {
+            return done(error)
+        }
+
+    }
+))
+
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const { rows } = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
+    const user = rows[0];
+
+    done(null, user);
+  } catch(err) {
+    done(err);
+  }
+});
 
 app.get("/", (req, res) => {
-    res.render("index")
+    res.render("index", { user: req.user })
 })
 
 app.get("/signup", (req, res) => {
     res.render("signup")
 })
 
+app.post("/signup", async (req, res, next) => {
+    try{
+        const hashedPassword = await bcrypt.hash(req.body.password, 10)
+        await signUpUser(req.body.firstname, req.body.lastname, req.body.username, hashedPassword)
+        res.redirect("/")
+    }catch(e){
+        console.log(e)
+        next(e)
+    }
+})
+
+app.post('/login', passport.authenticate('local', {
+  failureRedirect: '/',
+  successRedirect: '/'
+}));
+
+
 app.get("/join", (req, res) => {
     res.render("join")
 })
+
+app.get("/logout", (req, res, next) => {
+  req.logout((err) => {
+    if (err) {
+      return next(err);
+    }
+    res.redirect("/");
+  });
+});
+
 
 app.use((req, res, next) => {
     res.render("error")
