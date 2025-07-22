@@ -104,6 +104,10 @@ form{
     margin-top: 20px;
 }
 
+.msg:last-of-type{
+    margin-bottom: 60px;
+}
+
 form{
     margin-left: auto;
     margin-right: auto;

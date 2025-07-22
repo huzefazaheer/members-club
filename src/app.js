@@ -60,7 +60,6 @@ app.get("/", async (req, res) => {
     }else{
         msgs = await getAllMessages()
     }
-    console.log(msgs)
     res.render("index", { user: req.user, msgs:msgs})
 })
 
