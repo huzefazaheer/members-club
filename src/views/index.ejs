@@ -39,7 +39,7 @@
         <div class="msg">
         <h3><%=msg.firstname || 'Anonymous'%></h3>
         <p><%=msg.message%></p>
-        <h5><%=msg.date%></h5>
+        <h5><%=new Date(msg.date).toDateString()%></h5>
         <% if(locals.user.isadmin){ %>
         <a id="del" href='/delete/<%= msg.id %>' class="delete">Delete</a>
         <% } %> 
