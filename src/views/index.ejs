@@ -1,51 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Members Club</title>
-    <link rel="stylesheet" href="/style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
     <nav>
-        <a href="/" class="logo">Members Club</a>
-        <ul>
-            <% if(locals.user){ %> 
-            <li><a href="/new">New Post</a></li>  
-            <li><a href="/join">Join Club</a></li> 
-            <li><a href="/logout">Logout</a></li> 
-            <% } else {%>
-            <li><a href="/login">Login</a></li>
-            <li><a href="/signup">Sign Up</a></li>
-            <% } %>
-        </ul>
+      <a href="/" class="logo">Members Club</a>
+      <ul>
+        <% if(locals.user){ %>
+        <li><a href="/new">New Post</a></li>
+        <li><a href="/join">Join Club</a></li>
+        <li><a href="/logout">Logout</a></li>
+        <% } else {%>
+        <li><a href="/login">Login</a></li>
+        <li><a href="/signup">Sign Up</a></li>
+        <% } %>
+      </ul>
     </nav>
     <div class="body">
-    <% if(!locals.user){ %>
-    <form action="/login" method="post">
+      <% if(!locals.user){ %>
+      <form action="/login" method="post">
         <h1>Sign In</h1>
         <div class="input">
-            <label for="username">Username</label>
-            <input type="text" name="username" id="username">
+          <label for="username">Username</label>
+          <input type="text" name="username" id="username" />
         </div>
         <div class="input">
-            <label for="password">Password</label>
-            <input type="password" name="password" id="password">
+          <label for="password">Password</label>
+          <input type="password" name="password" id="password" />
         </div>
         <button type="submit">Sign In</button>
-    </form>
-    <% } else { %>
-    <% msgs.forEach(msg =>{ %>
-        <div class="msg">
+      </form>
+      <% } else { %> <% msgs.forEach(msg =>{ %>
+      <div class="msg">
         <h3 class="username"><%=msg.firstname || 'Anonymous'%></h3>
         <p><%=msg.message%></p>
         <h5><%=new Date(msg.date).toDateString()%></h5>
         <% if(locals.user.isadmin){ %>
-        <a id="del" href='/delete/<%= msg.id %>' class="delete">Delete</a>
-        <% } %> 
+        <a id="del" href="/delete/<%= msg.id %>" class="delete">Delete</a>
+        <% } %>
+      </div>
+      <% }) %> <% } %>
     </div>
-    <% }) %>
-    <% } %>
-    </div>
-</body>
+  </body>
 </html>
