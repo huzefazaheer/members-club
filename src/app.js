@@ -103,7 +103,7 @@ app.post(
 
 app.get('/join', (req, res) => {
   if (req.user) {
-    res.render('join')
+    res.render('join', { user: req.user })
   } else {
     throw new Error('uhuh')
   }
